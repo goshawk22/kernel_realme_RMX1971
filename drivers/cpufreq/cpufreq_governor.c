@@ -156,7 +156,7 @@ unsigned int dbs_update(struct cpufreq_policy *policy)
 			j_cdbs->prev_cpu_nice = cur_nice;
 		}
 
-		if (unlikely(!wall_time || wall_time < idle_time))
+		if (unlikely(!time_elapsed || time_elapsed < idle_time))
 			continue;
 
 		/*
@@ -177,10 +177,10 @@ unsigned int dbs_update(struct cpufreq_policy *policy)
 		 *
 		 * Detecting this situation is easy: the governor's deferrable
 		 * timer would not have fired during CPU-idle periods. Hence
-		 * an unusually large 'wall_time' (as compared to the sampling
+		 * an unusually large 'time_elapsed' (as compared to the sampling
 		 * rate) indicates this scenario.
 		 */
-		if (unlikely(wall_time > (2 * sampling_rate) &&
+		if (unlikely(time_elapsed > (2 * sampling_rate) &&
 			     j_cdbs->prev_load)) {
 			load = j_cdbs->prev_load;
 		} else if (unlikely(time_elapsed > 2 * sampling_rate &&
@@ -505,7 +505,6 @@ void cpufreq_dbs_governor_exit(struct cpufreq_policy *policy)
 	if (!count) {
 		if (!have_governor_per_policy())
 			gov->gdbs_data = NULL;
-			j_cdbs->copy_prev_load = true;
 
 		gov->exit(dbs_data);
 		kfree(dbs_data);
