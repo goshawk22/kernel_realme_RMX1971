@@ -30,6 +30,7 @@
 #include <drm/drm_atomic.h>
 #include <drm/drm_mode.h>
 #include <drm/drm_plane_helper.h>
+#include <linux/devfreq_boost.h>
 #include <linux/sync_file.h>
 
 #include "drm_crtc_internal.h"
