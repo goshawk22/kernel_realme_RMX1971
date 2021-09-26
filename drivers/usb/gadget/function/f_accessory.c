@@ -1344,8 +1344,10 @@ static int acc_setup(void)
 	if (ret)
 		goto err_zap_ptr;
 
-	/* _acc_dev must be set before calling usb_gadget_register_driver */
-	_acc_dev = dev;
+	/* acc_dev must be set before calling usb_gadget_register_driver */
+	dev->ref = ref;
+	kref_init(&ref->kref);
+	ref->acc_dev = dev;
 
 	return 0;
 
