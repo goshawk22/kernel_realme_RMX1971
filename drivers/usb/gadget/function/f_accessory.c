@@ -949,12 +949,6 @@ int acc_ctrlrequest(struct usb_composite_dev *cdev,
 	 */
 	if (!dev)
 		return -ENODEV;
-/*
-	printk(KERN_INFO "acc_ctrlrequest "
-			"%02x.%02x v%04x i%04x l%u\n",
-			b_requestType, b_request,
-			w_value, w_index, w_length);
-*/
 
 	if (b_requestType == (USB_DIR_OUT | USB_TYPE_VENDOR)) {
 		if (b_request == ACCESSORY_START) {
@@ -1340,13 +1334,17 @@ static int acc_setup(void)
 	INIT_DELAYED_WORK(&dev->start_work, acc_start_work);
 	INIT_WORK(&dev->hid_work, acc_hid_work);
 
+	dev->ref = ref;
+	if (cmpxchg_relaxed(&ref->acc_dev, NULL, dev)) {
+		ret = -EBUSY;
+		goto err_free_dev;
+	}
+
 	ret = misc_register(&acc_device);
 	if (ret)
 		goto err_zap_ptr;
 
-	/* _acc_dev must be set before calling usb_gadget_register_driver */
-	_acc_dev = dev;
-
+	kref_init(&ref->kref);
 	return 0;
 
 err_zap_ptr:
